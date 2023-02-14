@@ -1,5 +1,7 @@
 package RestAssuredProject;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
@@ -9,6 +11,7 @@ import org.testng.annotations.Test;
 
 import static io.restassured.RestAssured.DEFAULT_PORT;
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.testng.Assert.assertEquals;
 public class jsonResponse{
@@ -42,6 +45,7 @@ public void JasonResponseV() {
                 .when().get()
 
                 .then()
+                .assertThat()
                 .statusCode(200)
                 .header("Content-Type",equalTo("application/json; charset=utf-8"))
                 .body("book[3].title",equalTo("The Lord of the Rings"))
@@ -59,8 +63,10 @@ public void JasonResponseV() {
         //using JSONObject class
         JSONObject jo=new JSONObject(response.asString()); //converting response to JSON Object
 
+
         //print all titles of books
-		for(int i=0; i<jo.getJSONArray("book").length();i++)
+
+        for(int i=0; i<jo.getJSONArray("book").length();i++)
 		{
 			String bookTitle=jo.getJSONArray("book").getJSONObject(i).get("title").toString();
 			System.out.println(bookTitle);

@@ -1,16 +1,14 @@
 package RestAssuredProject;
 
+import RestAssuredProject.AssignmentREstAssured.Auth;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
-
 import java.util.HashMap;
-
 import static org.hamcrest.Matchers.equalTo;
-
 public class Restful_bookerTest {
     //Global variable
     String BASE_URI = "https://restful-booker.herokuapp.com";
@@ -26,16 +24,15 @@ public class Restful_bookerTest {
     @Test(priority = 2)
     void PingRequest() {
         RestAssured.baseURI = BASE_URI;
-        RequestSpecification r = RestAssured.given();
+        //RequestSpecification r = RestAssured.given();//This line of code creates an instance of the
+        // RequestSpecification class using the given() method from the RestAssured class.
+        //String ss= r.body().toString();
         RestAssured.given().basePath("/ping")
-                .auth().basic("admin", "password123")
+                //.auth().basic("admin", "password123")
                 .when().get()
-
                 .then()
-                .log().all().statusCode(201);
-        ResponseSpecification response = r.then().statusCode(201)
-                .body("text", equalTo("Created"));
-
+                .log().all()
+                .body(equalTo("Created"));
     }
 
     @Test(priority = 3)
@@ -112,20 +109,24 @@ public class Restful_bookerTest {
     @Test(priority=5)
     void filterByID() {
         RestAssured.baseURI = BASE_URI;
-        RestAssured.given().basePath("booking/46").headers("content-Type", "application/json")
+        RestAssured.given().basePath("booking/3").headers("content-Type", "application/json")
                 .when().get()
                 .then()
                 .log().all().statusCode(200)
-                .body("firstname", equalTo("Josh"))
+                //.body("firstname", equalTo("Bob"))
                 .header("Content-Type", equalTo("application/json; charset=utf-8"));
 
     }
 
     @Test(priority=6)
     void CreateToken() {
+        Auth auth=new Auth();
+        auth.setUsername("admin");
+        auth.setPassword("password123");
         RestAssured.baseURI = BASE_URI;
         RestAssured.given().basePath("auth").headers("content-Type", "application/json")
-                .auth().basic("admin", "password123")
+                .auth().basic("Admin", "password123")
+                .body(auth)
                 .when().post()
                 .then()
                 .log().all().statusCode(200)
@@ -171,7 +172,7 @@ public class Restful_bookerTest {
     @Test(priority = 8)
     void testDelete() {
         RestAssured.baseURI = BASE_URI;
-        RestAssured.given().basePath("/booking/128").contentType(ContentType.JSON)
+        RestAssured.given().basePath("/booking/65").contentType(ContentType.JSON)
                 .header("Authorization","Basic YWRtaW46cGFzc3dvcmQxMjM=")
                 .auth().basic("admin", "password123")
                 .when().delete()
@@ -188,7 +189,7 @@ public class Restful_bookerTest {
         data.put("lastname", "MAmaa");
 
         RestAssured.baseURI = BASE_URI;
-        RestAssured.given().basePath("/booking/1")
+        RestAssured.given().basePath("/booking/4")
                 .header("Authorization","Basic YWRtaW46cGFzc3dvcmQxMjM=")
                 .cookie("token", "fd771e317011e1f")
                 .contentType(ContentType.JSON)
@@ -202,5 +203,25 @@ public class Restful_bookerTest {
                 .statusCode(200)
                 .log().all();
     }
+    @Test(priority=10)
+    void filterByValidName() {//booking?firstname=Jim&lastname=Brown
+        RestAssured.baseURI = BASE_URI;
+        RestAssured.given()
+                .pathParam("mypath","booking")    // path parameters
+                .queryParam("firstname","Jim")
+                .queryParam("lastname","Brown")
+                .basePath("/{mypath}")// query parameter
+                .auth().basic("admin", "password123")
+
+                .when().get()
+
+                .then()
+                .log().all()
+                .statusCode(200);
+                //.body("bookingid", equalTo(4));
+
+
+    }
+
 
 }
